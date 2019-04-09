@@ -1,0 +1,95 @@
+\\<!-- 2주차 과제 첫번째 숙제 -->
+import numpy as np
+import matplotlib.pyplot as plt
+
+dataset = np.array([
+    [120, 3],
+    [105, 2],
+    [25, 12],
+    [32, 15],
+    [17, 9],
+    [98, 5],
+    [130, 1],
+    [0, 16],
+    [40, 20],
+    [100, 10]
+])
+
+labels = np.array(["comedy", "comedy", "drama",
+                   "drama","drama","comedy","comedy",
+                   "drama","drama","comedy"])
+
+def classify_knn_modify(inX, dataset, labels, K):
+    # (1) 우리가 분류항목을 알고자 하는 점 (inX)와
+    # 알고 있는 점들(dataset)과의 모든 점 거리를 계산
+
+    dists = np.abs(np.sum((inX - dataset), axis=1))
+    #dists = np.sqrt(np.sum((inX - dataset) ** 2, axis=1))
+    #dists = np.max(np.abs((inX - dataset)))
+
+    print("dists 를 출력합니다.")
+    print(dists)
+
+    # (2) 오름 차순으로 거리의 길이를 정렬
+    sorted_index = dists.argsort()
+
+    # (3) inX와의 거리가 가장짧은 K개의 아이템 추출
+    sorted_labels = labels[sorted_index]
+    K_nearest_labels = sorted_labels[:K]
+
+    # (4) K개의 아이템에서 가장 많은 분류 항목 찾기
+    _labels, count_labels = np.unique(K_nearest_labels,
+                                      return_counts=True)
+
+    # (5) 해당 항목 반환
+    return _labels[count_labels.argmax()]
+
+inX = np.array([60,0])
+
+plt.title("The Category of Movie")
+plt.scatter(dataset[labels=="comedy",0],dataset[labels=="comedy",1],
+            label='comedy', c='g')
+plt.scatter(dataset[labels=="drama",0],dataset[labels=="drama",1],
+            label='drama', c='r')
+plt.scatter(inX[0],inX[1],label="?",
+            c='b')
+
+plt.xlim(-10,140)
+plt.ylim(-10,40)
+
+plt.xlabel('The number of smile')
+plt.ylabel('The number of cry')
+plt.legend()
+plt.show()
+
+dataset = (dataset - dataset.mean()) / dataset.std()
+answer = classify_knn_modify(inX,dataset,labels,4)
+print(answer)
+
+
+
+\*\* knn 알고리즘 숙제를 하면서 느낀점 \*\*
+처음에 숙제에서 무엇을 의도하는지를 몰랐다. 사실 처음나의 생각은 웃는 횟수가 우는 횟수보다 많으면 코미디이고, 우는 횟수가 웃는 횟수보다 많으면 드라마일것이라고 생각하였다.
+그런 알고자 하는 inX에 대하여 데이터셋과 거리계산을 하였는대 문제에서 말한거처럼 한번도 울지도 않았는대 드라마로 답이 나왔었다. 데이터를 자세히보니웃는횟수가 40이고 우는횟수가20인 feature는
+label이 drama였다. 어떻게 문제를 처리하기위해 고민한 결과 수업중의 선생님의 말씀이 생각났다. 범주가 큰 데이터는 범주가 작은 데이터에 영향을 끼칠수 있다 라는말씀이셨는대...
+다시말하면, 아래와 같은 문제점이 도출된다.
+1. smile의 데이터 범주는 0 ~ 130 수치를 가지고 있다.
+2. cry의 데이터 범주는 1 ~ 20 수치를 가지고 있다.
+3. 각각의 data들은 수치의 단위가 다르다
+4. 기존 knn 알고리즘을 사용시 잘못된 결과값이 나온다.
+
+- 잘못된 결과값이 나온 이유 -
+우리가 구하고자, 알고자 하는 점 inX 와 dataset에 feture들의 데이터를 이용하여 거리계산을 하였을때 단위가 큰 수치는 단위가 작은 수치의 결과 값에 영향을 준다는 것이다? 
+이렇게 말하는게 맞는지 모르겠지만 예를 들어설명하자면 아래와 같다
+코미디의 데이터 수치 범위가 300 ~ 500 까지있고 드라마의 데이터 수치 범위가 0 ~ 10 까지있다고 하자. 극단적이긴 하지만 이해하기 쉽게 설명을 정리하고 싶다.
+위와 같은 데이터 수치는 코미디가 나올 확률이 극단적으로 높다고 할 수 있다. 즉, 이런 이유로 거리계산시 올바르지 않은  거리계산을 하게된다.
+
+- 해결 방법 -
+거리계산시 수치가 큰 값만 결과에 반영이 되기때문에 이를 해결하기위해서는 표준화(normalization), 정규화(standardization)을 통해 데이터의 전처리 과정을 거쳐야 한다.
+데이터의 전처리 과정은 위와 같은 이유때문에 꼭 거쳐야할 과정이라고 느꼈다. 
+데이터 정규화 과정의 식은 아래와 같이 하였다(normalization은 시도하였는대 실패하였다)
+dataset = (dataset - dataset.mean()) / dataset.std()
+편차에 표준편차를 나누어 줌으로써 데이터들이 평균을 기준으로 얼마나 떨어져 있는지를 나타냄으로써 2개 이상의 데이터 범주의 단위가 다를때 각각의 데이터들을 같은 기준으로 볼 수 있게? 해주었다.
+그 후 테스트를 통해 답을 확인할 수 있었다.
+정규화를 통해 나온 데이터들은 -0.850 ~ 2.115 로분포되었다 확실히 데이터의 간격이 줄어든것을 볼 수 있었다. 이로써 거리계산을 할때 올바르지 않은 결과를 낼 확률이 줄어든다는 것을 알수있었다.
+
