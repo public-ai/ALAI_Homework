@@ -1,4 +1,5 @@
 \\<!-- 2주차 과제 첫번째 숙제 -->
+-- 2주차 과제 첫번쨰 숙제 --
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -92,4 +93,73 @@ dataset = (dataset - dataset.mean()) / dataset.std()
 편차에 표준편차를 나누어 줌으로써 데이터들이 평균을 기준으로 얼마나 떨어져 있는지를 나타냄으로써 2개 이상의 데이터 범주의 단위가 다를때 각각의 데이터들을 같은 기준으로 볼 수 있게? 해주었다.
 그 후 테스트를 통해 답을 확인할 수 있었다.
 정규화를 통해 나온 데이터들은 -0.850 ~ 2.115 로분포되었다 확실히 데이터의 간격이 줄어든것을 볼 수 있었다. 이로써 거리계산을 할때 올바르지 않은 결과를 낼 확률이 줄어든다는 것을 알수있었다.
+또한 k의갯수에 따라서 결과 값에 영향을 줄수있다. 짝수보다는 홀수 1보다는 1이상의 값을 설정해야 할거 같다.
 
+
+
+
+-- 2주차 과제 2번째 숙제 --
+
+def cluster_kmeans(dataset, k):
+    # (1) 중심점 초기화
+    min_x = dataset[:, 0].min()
+    max_x = dataset[:, 0].max()
+    min_y = dataset[:, 1].min()
+    max_y = dataset[:, 1].max()
+
+    center_x = np.random.uniform(low=min_x, high=max_x, size=k)
+    center_y = np.random.uniform(low=min_y, high=max_y, size=k)
+    centroids = np.stack([center_x, center_y], axis=-1)
+    print("centroids 값")
+    print(centroids)
+
+    # (2) ~ (5) 순회
+    num_data = dataset.shape[0]
+    cluster_per_point = np.zeros((num_data))  # 각 점 별 군집
+
+    counter = 0
+    while True:
+        prev_cluster_per_point = cluster_per_point
+
+        # (2) 거리 계산 |x_1-x_2| + |y_1-y_2|
+        dists = []
+        for center in centroids:
+            # 각 중심점 2개 기준으로 각데이터 간 거리 계산
+            dist_from_center = []
+            for point in dataset:
+                dist = np.sum(np.abs(center - point))
+                dist_from_center.append(dist)
+            dists.append(dist_from_center)
+        dists = np.array(dists)
+       
+        # (3) 각 데이터를 거리가 가장 가까운 군집으로 할당
+        cluster_per_point = dists.argmin(axis=0)
+        # (4) 각 군집 별 점들의 평균을 계산 후, 군집의 중심점을 다시 계산
+        for i in range(k):
+             centroids[i] = np.median(dataset[cluster_per_point == i], axis=0)
+        print("cluster_per_point")
+        print(cluster_per_point)
+
+        if np.all(prev_cluster_per_point == cluster_per_point):
+            break
+
+        counter += 1
+        plt.title("{}th Distribution of Dataset".format(counter))
+        for idx, color in enumerate(['r', 'g', 'b', 'y']):
+            mask = (cluster_per_point == idx)
+            plt.scatter(dataset[mask, 0], dataset[mask, 1],
+                        label='dataset', c=color)
+            plt.scatter(centroids[:, 0], centroids[:, 1],
+                        s=200, label="centroid", marker='+')
+        plt.show()
+
+    return centroids
+
+print(cluster_kmeans(dataset,2))
+
+\*\* k-means 알고리즘 숙제를 하면서 느낀점 \*\*
+데이터의 퍼져있는 정도를 육안으로 볼때와 실제 컴퓨터가 알고리즘을 통해서 나오는
+군집의 결과를 볼때 결과값이 달랐다. k-means 알고리즘은 평균값을 대표값 즉 군집으로 설정하기 때문에 이상값들에 취약한 경향을 뛰지만 k-median 알고리즘은 중앙값을 대표값으로 가져가기 때문에 오차가 줄어든거 같다. 
+정확히 어떤 데이터에 어떤 올바른 거리계산 및 알고리즘을 적용할지는 배우는 단계라서 감을 잡을 수 없었지만 이 숙제를 하면서 깨달은 것은
+중앙값은 평균에 비해 이상값(outlier)에 영향을 확실히 덜받는 것으로 결과가 나왔다.
+궁금한점은 거리계산에서 median의 거리계산 속도가 means의 거리속도와 같지 않고 연산속도가 더 걸린다면 사용해야 할가?? 결과는 올바르게 나오는대.. 라는 궁금증이 들긴했었다.
