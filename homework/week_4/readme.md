@@ -16,7 +16,7 @@
 5. Graph 을 저장하고 복원하는 코드를 작성해주세요.
 <br><br><br><br>
 
-# 2. Julia fractal 은 망델브로와 다른 fractal 입니다.<br>
+# 2. Julia fractal 구현하기.<br>
 
 아래 Graph 을 아래 조건에 맞게 구현해 주세요.
 ![julia_pic](./pic/julia_graph.png)<br>
@@ -37,8 +37,8 @@ section 7 excercise 의 rain Drop 을 구현해주세요
 
 # 4. Kmeans , KNN 을 Tensorflow 로 구현해 주세요.<br>
 
-+ kmeans_implemented_by_tensorflow.ipynb
-+ Knn_implemented_by_tensorflow.ipynb
++ kmeans_implemented_by_tensorflow.ipynb 을 풀어주세요
++ Knn_implemented_by_tensorflow.ipynb 을 풀어주세요 
 
 
 # 5. Excercise
