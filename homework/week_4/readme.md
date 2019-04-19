@@ -23,8 +23,8 @@
 
 1. Graph 을 텐서보드에 추가해주세요
 2. 변수 'ns' 의 mean 값을 텐서보드에 추가해주세요. (`tf.summary.scalar` 사용)
-3. 변수 'ns' 의 histogram 을 텐서보드에 추가해주세요. (`tf.summary.scalar` 사용)
-4. 변수 'ns' 의 image 을 텐서보드에 추가해 주세요. (`tf.summary.scalar` 사용)<br>
+3. 변수 'ns' 의 histogram 을 텐서보드에 추가해주세요. (`tf.summary.histogram` 사용)
+4. 변수 'ns' 의 image 을 텐서보드에 추가해 주세요. (`tf.summary.image` 사용)<br>
 (텐서를 `tf.summary.scalar` 에 추가할 때는 반드시 4D 텐서로 변환해야 합니다)
 5. Graph 을 저장하고 복원하는 코드를 작성해주세요.
 
