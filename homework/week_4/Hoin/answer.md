@@ -1,4 +1,4 @@
-1.
+1. Mandelbrot
 <pre> <code>
 %matplotlib inline
 !pip install tensorboardcolab
@@ -64,7 +64,7 @@ ns = graph.get_tensor_by_name('ns:0')
 </code></pre>
 
 
-2.
+2.Julia
 <pre> <code>
 tbc = tensorboardcolab.TensorBoardColab(graph_path='./tensorboard')
 
@@ -125,7 +125,7 @@ zs = graph.get_tensor_by_name('zs:0')
 ns = graph.get_tensor_by_name('ns:0')
 </code> </pre>
 
-3.
+3.rain drop
 <pre> <code>
 graph = tf.Graph()
 with graph.as_default():
@@ -174,4 +174,57 @@ with graph.as_default():
 Kmeans
 <pre><code>
 
+</code></pre>
+
+5. section 6
+<pre><code>
+# 우선 실행해주세요
+graph = tf.Graph()
+with graph.as_default():
+    xs = tf.placeholder(tf.float32, shape=(None,), name='x')
+    y_true = tf.placeholder(tf.float32, shape=(None,), name='y_true')
+
+    # 변수 초기화
+    with tf.variable_scope('weights'):
+        W = tf.Variable(tf.random.normal([1]),"W")
+        b = tf.Variable(tf.zeros([1]),'b')
+        
+
+    # Model
+    with tf.variable_scope("Linear_Regression"):
+        y_pred = W * xs + b
+    y_pred = tf.identity(y_pred, name="y_pred")
+    
+    # Loss Function
+    with tf.variable_scope("losses"):
+        loss = tf.reduce_mean(tf.square(y_pred - y_true))
+    
+    # Optimizer
+    train_op = (tf.train
+                .GradientDescentOptimizer(0.01)
+                .minimize(loss))
+    
+log_dir = "./log/"
+tbc = tensorboardcolab.TensorBoardColab(graph_path=log_dir)
+with graph.as_default():
+    sess = tf.Session(graph=graph)
+    sess.run(tf.global_variables_initializer())
+    
+    writer = tf.summary.FileWriter(logdir=log_dir)
+    writer.add_graph(graph)
+    
+    tb_w = tf.summary.scalar(name='w_', tensor=tf.reduce_mean(W))
+    tb_b = tf.summary.scalar(name='b_', tensor=tf.reduce_mean(b))
+    tb_loss = tf.summary.scalar(name='tb_loss', tensor=loss)
+    
+    merged_all = tf.summary.merge_all()
+    
+    for step in range(1000):
+        _, summary_values = sess.run([train_op, merged_all],
+                                     feed_dict={
+                                         xs:data_X,
+                                         y_true:data_Y
+                                     })
+        writer.add_summary(summary_values, step)
+    writer.flush()
 </code></pre>
