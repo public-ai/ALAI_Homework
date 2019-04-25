@@ -42,12 +42,27 @@ with graph2.as_default() :
         for i in range(200) :
             merged_, step_ = sess.run([merged, step])
             writer.add_summary(merged_, i)
+        saver = tf.train.Saver()
+        saver.save(sess, './model/mangdel')
     
     writer.flush()
+    
+    
+tf.reset_default_graph()
+sess = tf.Session()
+tf.train.import_meta_graph(meta_graph_or_file='./model/mangdel.meta')
+ns = tf.get_default_graph().get_tensor_by_name('ns:0')
+saver = tf.train.Saver()
+saver.restore(sess, './model/mangdel')
+graph = tf.get_default_graph()
+
+ns_ = sess.run(ns)
+plt.imshow(ns_)
 
 ```
 
 2. Julia fractal
+
 ```python3
 
 Y,X = np.mgrid[-2:2:0.005, -2:2:0.005]
@@ -83,6 +98,21 @@ with tf.Session(graph = graph3) as sess:
         _, merged_ = sess.run([step, merged])
         writer.add_summary(merged_, i)
     writer.flush()
+
+    saver = tf.train.Saver()
+    saver.save(sess, './model/julia')
+
+#그래프 리스토어 및 확인
+tf.reset_default_graph()
+sess = tf.Session()
+tf.train.import_meta_graph(meta_graph_or_file='./model/julia.meta')
+ns = tf.get_default_graph().get_tensor_by_name('ns:0')
+saver = tf.train.Saver()
+saver.restore(sess, './model/julia')
+graph = tf.get_default_graph()
+
+ns_ = sess.run(ns)
+plt.imshow(ns_)
 
 ```
 
