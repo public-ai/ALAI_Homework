@@ -158,7 +158,7 @@ with graph.as_default():
     output = tf.clip_by_value(multi, clip_value_min = 0, clip_value_max = 255)
  ~~~
  
- ### 4. (1) Kmeans
+ ### 4-1. Kmeans
  ~~~
  tf.reset_default_graph()
 
