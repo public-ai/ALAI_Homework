@@ -173,6 +173,47 @@ with graph.as_default():
 
 Kmeans
 <pre><code>
+k = 4
+
+# (1) 중심점 초기화
+min_ = tf.math.reduce_min(dataset, axis=[0])
+max_ = tf.math.reduce_max(dataset, axis=[0])
+center = tf.random.uniform(shape=(k, 2), minval=min_, maxval=max_, dtype=tf.float64)
+    
+centroid = tf.Variable(center, name='centroid')
+
+cluster_per_point = tf.Variable(tf.zeros(shape=dataset.shape[0], dtype=tf.int64), name='cluster_point')
+
+# (2) 거리 계산 
+diff_mat = tf.subtract(tf.reshape(centroid, (-1,1,2)), tf.reshape(dataset, (1,-1,2)))
+dists = tf.sqrt(tf.reduce_sum(tf.multiply(diff_mat, diff_mat), axis=2))
+
+# (3) 각 데이터를 거리가 가장 가까운 군집으로 할당
+cluster_ = tf.assign(cluster_per_point, tf.argmin(dists, axis=0))
+
+# (4) 각 군집 별 점들의 평균을 계산 후, 군집의 중심점을 다시 계산
+# for in 구문으로
+means_ = tf.zeros(shape=(1, 2), dtype=tf.float64)
+for i in range(k):
+    idx_ = tf.where(tf.equal(cluster_per_point, i))
+    data_ = tf.gather(dataset, idx_)
+    mean_ = tf.reshape(tf.reduce_mean(data_, axis=0), [1, 2])
+    means_ = tf.concat([means_, mean_], axis=0)
+means_ = tf.slice(means_, [1,0], [4,2])
+
+update_centroides = tf.assign(centroid, means_)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+for i in range(100):
+    _, __, centroid_, cluster_point_ =sess.run([update_centroides, cluster_, centroid, cluster_per_point])
+    
+print(centroid_)
+
+plt.scatter(dataset[:,0], dataset[:,1])
+plt.scatter(centroid_[:,0], centroid_[:,1], marker='+')
+plt.show()
 
 </code></pre>
 
