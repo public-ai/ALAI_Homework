@@ -1,3 +1,85 @@
+### OVA
+~~~
+%matplotlib inline
+
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+~~~
+~~~
+iris = load_iris()
+xs = iris['data']
+ys = iris['target']
+ys_name = iris['target_names']
+~~~
+~~~
+class IrisIdentifer:
+    def __init__(self, sess, target_name, target_index):
+        self.sess = sess
+        self.target_name = target_name
+        self.target_index = target_index
+        
+        self.xs = iris['data']
+        self.ys = iris['target']
+        
+        # xs normalization
+        self.xs = (self.xs - np.min(self.xs, axis = 0)) / (np.max(self.xs, axis = 0) - np.min(self.xs, axis = 0)) # shape = (150,4)
+        
+        # ys 수정, 정답: 1, 오답: 0
+        target_indices = np.where(ys == self.target_index)
+        self.ys[target_indices] = 1
+        other_indices = np.where(ys != self.target_index)
+        self.ys[other_indices] = 0
+        self.ys = tf.reshape(ys, [-1, 1])
+        self.ys = tf.cast(ys, tf.float64)
+        
+        # 필요한 변수 선언.
+        self.lr = 0.01
+        self.acc = tf.Variable(-10, dtype = tf.float64)
+        
+        # layer1 (hidden)
+        self.weights_1 = tf.Variable(tf.random.normal(shape = [4,10], mean = 0.0, stddev = 0.1, dtype = tf.float64), name = "weights_1") # shape = (150, unit)
+        self.bias_1 = tf.Variable(tf.zeros(shape = [10,], dtype = tf.float64), name = "bias_1")
+
+        # layer2 (출력층)
+        self.weights_2 = tf.Variable(tf.random.normal(shape = [10,1], mean = 0.0, stddev = 0.1, dtype = tf.float64), name = "weights_2") # shape = (150, unit)
+        self.bias_2 = tf.Variable(tf.zeros(shape = [1,], dtype = tf.float64), name = "bias_2")
+        
+        self.sess.run(tf.global_variables_initializer())
+        
+        
+    def train(self):
+        z_1 = tf.matmul(self.xs, self.weights_1) + self.bias_1
+        a_1 = tf.nn.relu(z_1)
+            
+        z_2 = tf.matmul(a_1, self.weights_2) + self.bias_2
+        a_2 = tf.nn.sigmoid(z_2)
+
+        a_2_ = tf.round(a_2) # a_2  0, 1 로 변환
+        
+        update_acc = tf.assign(ref = self.acc, value = tf.math.reduce_mean(tf.cast(tf.equal(a_2_, self.ys), tf.float64)))
+  
+        self.ys = tf.reshape(self.ys, [-1, 1])
+        loss = tf.nn.sigmoid_cross_entropy_with_logits(logits= a_2, labels= self.ys)
+
+        optimize = tf.train.GradientDescentOptimizer(self.lr).minimize(loss)
+    
+        self.sess.run([optimize, update_acc])
+~~~
+~~~
+sess = tf.Session()
+irisIdentifier_1 = IrisIdentifer(sess, "Setosa", 0)
+irisIdentifier_2 = IrisIdentifer(sess, "Versicolour", 1)
+irisIdentifier_3 = IrisIdentifer(sess, "Virginica", 2)
+
+for i in np.arange(100):
+    irisIdentifier_1.train()
+    irisIdentifier_2.train()
+    irisIdentifier_3.train()
+~~~
+
 ### week5_7_Logistic_Regression.ipynb
 ~~~
 # init
