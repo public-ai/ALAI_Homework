@@ -1,8 +1,12 @@
 # Week 9 - Convolution Neural Network
 
+CIFAR-10 데이터를 학습하고 모델의 정확도를 최종적으로 90% 이상으로 끌어올리는 여정을 시작합니다.
+
 이 번 Homework 부터 모델의 상세 조건들을 작성해주세요.
 
 아래와 같이 표를 적상해주세요.
+똑같을 필요는 없습니다. 하지만 중요한 정보들이 기록되고 그 기록을 바탕으로 모델에 대해 추론하고 발전 시켜야 합니다
+
 
 - 목표 Receptive Field : 28 <br>
 - Convolution Phase 후  출력 크기  :  4 <br>
